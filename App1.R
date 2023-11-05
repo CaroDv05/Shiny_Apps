@@ -136,12 +136,115 @@ server <- function(input, output, session) {
     
   })
   
+  observeEvent(input$filtro, {
+    
+    output$tabla_años <- renderDataTable({
+      
+      datos_filtrados <- datos_empleo[
+        
+        datos_empleo$anyo == input$año, ]
+      
+    }, options = list(scrollX = TRUE))
+    
+  })
+  
+  output$grafico_empleos <- renderPlot({
+    
+    datos_genero <- datos_empleo|> 
+      
+      filter(!is.na(desempleo_mujeres) & !is.na(desempleo_hombres)) |> 
+      
+      group_by(codigo_pais_region) |> 
+      
+      summarise(cantidad = sum(desempleo_mujeres) + sum(desempleo_hombres))
+    
+    ggplot(datos_genero) +
+      
+      geom_bar(mapping = aes(x = codigo_pais_region, y = cantidad), colour = "red",stat = "identity")+
+      
+      scale_y_continuous(breaks = seq(0, 400000, by = 50000))+
+      
+      theme_minimal() +
+      
+      labs(title = "Países con mayor desempleo en América Latina",
+           
+           subtitle = "Hombres y mujeres en condición de desempleo",
+           
+           x = "País",
+           
+           y = "Cantidad de personas desempleadas")
+    
+  })
+  
+  output$grafico_empleos2 <- renderPlot({
+    
+    datos_desempleo_educacion<- datos_empleo|> 
+      
+      filter(!is.na(desempleo_educacion_mujeres) & !is.na(desempleo_educacion_hombres)) |> 
+      
+      group_by(codigo_pais_region) |> 
+      
+      summarise(cantidad = sum(desempleo_educacion_mujeres) + sum(desempleo_educacion_hombres))
+    
+    
+    ggplot(datos_desempleo_educacion) +
+      
+      geom_bar(mapping = aes(x = codigo_pais_region ,y = cantidad), colour = "red",stat = "identity")+
+      
+      scale_y_continuous(breaks = seq(0, 400000, by = 50000))+
+      
+      theme_minimal() +
+      
+      labs(title = "Países con mayor desempleo en América Latina",
+           
+           subtitle = "Hombres y mujeres con estudios terciarios en condición de desempleo",
+           
+           x = "País",
+           
+           y = "Cantidad de personas desempleadas")
+    
+  })
+  
+  output$grafico_empleos3 <- renderPlot({
+    
+    datos_empleo_informal<- datos_empleo|> 
+      
+      filter(!is.na(empleo_informal_mujeres) & !is.na(empleo_informal_hombres)) |> 
+      
+      group_by(codigo_pais_region) |> 
+      
+      summarise(cantidad = sum(empleo_informal_mujeres) + sum(empleo_informal_hombres))
+    
+    
+    ggplot(datos_empleo_informal) +
+      
+      geom_bar(mapping = aes(x = codigo_pais_region ,y = cantidad), colour = "red",stat = "identity")+
+      
+      scale_y_continuous(breaks = seq(0, 400000, by = 50000))+
+      
+      theme_minimal() +
+      
+      labs(title = "Países con mayor empleo informal en América Latina",
+           
+           subtitle = "Hombres y mujeres en condición de empleo informal",
+           
+           x = "País",
+           
+           y = "Cantidad de personas con empleo informal")
+    
+  })
+  
 }
 
 
 
-  
-  
-  
-  
-  shinyApp(ui, server)
+
+
+
+
+
+
+
+
+
+shinyApp(ui, server)
