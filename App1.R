@@ -98,11 +98,48 @@ ui <- dashboardPage(
   
 )
 
+server <- function(input, output, session) {
   
+  datos_empleo <- read.csv("datos/datos_empleo_genero.csv")
   
+  observe({ 
+    
+    updateSelectInput(session, "pais", choices = unique(datos_empleo$pais_region)) 
+    
+    updateSelectInput(session, "años", choices = unique(datos_empleo$anyo)) 
+    
+    updateSelectInput(session, "año", choices = unique(datos_empleo$anyo))
+    
+  })
   
+  observeEvent(input$filtrar, {
+    
+    output$tabla_empleos <- renderDataTable({
+      
+      datos_filtrados <- datos_empleo[
+        
+        datos_empleo$pais_region == input$pais & datos_empleo$anyo == input$años, ]
+      
+    }, options = list(scrollX = TRUE))
+    
+  })
   
+  observeEvent(input$filtro, {
+    
+    output$tabla_años <- renderDataTable({
+      
+      datos_filtrados <- datos_empleo[
+        
+        datos_empleo$anyo == input$año, ]
+      
+    }, options = list(scrollX = TRUE))
+    
+  })
   
+}
+
+
+
   
   
   
