@@ -15,7 +15,7 @@ library(gapminder)
 
 ui <- dashboardPage( 
   
-  skin = "red",
+  skin = "green",
   dashboardHeader(title = "Datos Spotify",
                   
                   titleWidth = 200),
@@ -54,7 +54,7 @@ ui <- dashboardPage(
                          
                          downloadButton("descargar_datos", "Descargar Datos"),
                          
-                         dataTableOutput("tabla_spotify")),
+                         dataTableOutput("tabla_spotify"))
                 
               ), #tabsetpanel
               
@@ -70,21 +70,26 @@ ui <- dashboardPage(
           
           tabPanel("Gráfico 1", 
                    
-                   h3("Visualización de gráfico: Países con mayor desempleo en América Latina"),
+                   h3("Visualización de gráfico: Popularidad Vs MPB"),
                    
-                   plotOutput("grafico_empleos")),
+                   plotOutput("grafico_spotify")),
           
           tabPanel("Gráfico 2", 
                    
-                   h3("Visualización de gráfico: Países con mayor desempleo en América Latina"),
+                   h3("Visualización de gráfico: Dancibilidad vs Duración"),
                    
-                   plotOutput("grafico_empleos2")),
+                   plotOutput("grafico_spotify2")),
           
           tabPanel("Gráfico 3", 
                    
                    h3("Visualización de gráfico: Países con mayor empleo informal en América Latina"),
                    
-                   plotOutput("grafico_empleos3"))
+                   plotOutput("grafico_empleos3")),
+          
+          
+         
+          
+          
           
         ) #tabsetpanel
         
@@ -121,51 +126,37 @@ server <- function(input, output, session) {
     
   })
   
-  observeEvent(input$filtro, {
-    
-    output$tabla_años <- renderDataTable({
-      
-      datos_filtrados <- datos_empleo[
-        
-        datos_empleo$anyo == input$año, ]
-      
-    }, options = list(scrollX = TRUE))
-    
-  })
+
   
   
   
-  output$grafico_empleos <- renderPlot({
+  output$grafico_spotify <- renderPlot({
     
-    datos_genero <- datos_empleo|> 
+    datos_filtrados <- datos_spotify[
       
-      
-      
-      filter(!is.na(desempleo_mujeres) & !is.na(desempleo_hombres)) |> 
-      
-      group_by(codigo_pais_region) |> 
-      
-      summarise(cantidad = sum(desempleo_mujeres) + sum(desempleo_hombres))
+      datos_spotify$year == input$year & datos_spotify$top.genre == input$top.genre, ]
     
-    ggplot(datos_genero) +
+    datos_dance_vs_duration <- datos_filtrados|> 
       
-      geom_bar(mapping = aes(x = codigo_pais_region, y = cantidad), colour = "red",stat = "identity")+
+      filter(!is.na(danceability) & !is.na(duration)) 
+    
+    ggplot(datos_dance_vs_duration) +
       
-      scale_y_continuous(breaks = seq(0, 400000, by = 50000))+
-      
+      geom_point(mapping = aes(x = danceability, y = energy), colour = "red",stat = "identity") +
+  
       theme_minimal() +
       
-      labs(title = "Países con mayor desempleo en América Latina",
+      labs(title = "Bailabilidad vs Duración de la canción",
            
-           subtitle = "Hombres y mujeres en condición de desempleo",
+           subtitle = "Comparación del nivel de bailabilidad con la duración de la canción",
            
-           x = "País",
+           x = "Bailabilidad",
            
-           y = "Cantidad de personas desempleadas")
+           y = "Duración")
     
   })
   
-  output$grafico_empleos2 <- renderPlot({
+  output$grafico_spotify2 <- renderPlot({
     
     datos_desempleo_educacion<- datos_empleo|> 
       
