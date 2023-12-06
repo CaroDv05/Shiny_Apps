@@ -70,21 +70,21 @@ ui <- dashboardPage(
           
           tabPanel("Gráfico 1", 
                    
-                   h3("Visualización de gráfico: Popularidad Vs MPB"),
+                   h3("Visualización de gráfico: Bailabilidad vs Energía"),
                    
                    plotOutput("grafico_spotify")),
           
           tabPanel("Gráfico 2", 
                    
-                   h3("Visualización de gráfico: Dancibilidad vs Duración"),
+                   h3("Visualización de gráfico: Duración vs Popularidad"),
                    
                    plotOutput("grafico_spotify2")),
           
           tabPanel("Gráfico 3", 
                    
-                   h3("Visualización de gráfico: Países con mayor empleo informal en América Latina"),
+                   h3("Visualización de gráfico: Valencia vs BMP"),
                    
-                   plotOutput("grafico_empleos3")),
+                   plotOutput("grafico_spotify3")),
           
           
          
@@ -142,75 +142,71 @@ server <- function(input, output, session) {
     
     ggplot(datos_dance_vs_duration) +
       
-      geom_point(mapping = aes(x = danceability, y = energy), colour = "red",stat = "identity") +
+      geom_point(mapping = aes(x = danceability, y = energy), colour = "green",stat = "identity") +
   
       theme_minimal() +
       
-      labs(title = "Bailabilidad vs Duración de la canción",
+      labs(title = "Bailabilidad vs Energía de la canción",
            
-           subtitle = "Comparación del nivel de bailabilidad con la duración de la canción",
+           subtitle = "Comparación del nivel de bailabilidad con la energía de la canción",
            
            x = "Bailabilidad",
            
-           y = "Duración")
+           y = "Energía")
     
   })
   
   output$grafico_spotify2 <- renderPlot({
     
-    datos_desempleo_educacion<- datos_empleo|> 
+    datos_filtrados <- datos_spotify[
       
-      filter(!is.na(desempleo_educacion_mujeres) & !is.na(desempleo_educacion_hombres)) |> 
-      
-      group_by(codigo_pais_region) |> 
-      
-      summarise(cantidad = sum(desempleo_educacion_mujeres) + sum(desempleo_educacion_hombres))
+      datos_spotify$year == input$year & datos_spotify$top.genre == input$top.genre, ]
     
+    datos_duration_popularity <- datos_filtrados|> 
+      
+      filter(!is.na(duration) & !is.na(popularity)) 
     
-    ggplot(datos_desempleo_educacion) +
+    ggplot(datos_duration_popularity) +
       
-      geom_bar(mapping = aes(x = codigo_pais_region ,y = cantidad), colour = "red",stat = "identity")+
-      
-      scale_y_continuous(breaks = seq(0, 400000, by = 50000))+
+      geom_point(mapping = aes(x = duration, y = popularity), colour = "green",stat = "identity") +
       
       theme_minimal() +
       
-      labs(title = "Países con mayor desempleo en América Latina",
+      labs(title = "Duración vs Popularidad de la canción",
            
-           subtitle = "Hombres y mujeres con estudios terciarios en condición de desempleo",
+           subtitle = "Comparación de la duración y popularidad de la canción",
            
-           x = "País",
+           x = "Duración",
            
-           y = "Cantidad de personas desempleadas")
+           y = "Popularidad")
     
   })
   
-  output$grafico_empleos3 <- renderPlot({
+  output$grafico_spotify3 <- renderPlot({
     
-    datos_empleo_informal<- datos_empleo|> 
+    datos_filtrados <- datos_spotify[
       
-      filter(!is.na(empleo_informal_mujeres) & !is.na(empleo_informal_hombres)) |> 
+      datos_spotify$year == input$year & datos_spotify$top.genre == input$top.genre, ]
+    
+    datos_valence_bpm<- datos_filtrados|> 
       
-      group_by(codigo_pais_region) |> 
-      
-      summarise(cantidad = sum(empleo_informal_mujeres) + sum(empleo_informal_hombres))
+      filter(!is.na(valence) & !is.na(bpm)) 
     
     
-    ggplot(datos_empleo_informal) +
+    ggplot(datos_valence_bpm) +
       
-      geom_bar(mapping = aes(x = codigo_pais_region ,y = cantidad), colour = "red",stat = "identity")+
-      
-      scale_y_continuous(breaks = seq(0, 400000, by = 50000))+
+      geom_point(mapping = aes(x = valence ,y = bpm), colour = "green",stat = "identity")+
+
       
       theme_minimal() +
       
-      labs(title = "Países con mayor empleo informal en América Latina",
+      labs(title = "Valencia VS BMP",
            
-           subtitle = "Hombres y mujeres en condición de empleo informal",
+           subtitle = "La valencia vs el tempo de la canción",
            
-           x = "País",
+           x = "Valencia",
            
-           y = "Cantidad de personas con empleo informal")
+           y = "BMP")
     
     
     
